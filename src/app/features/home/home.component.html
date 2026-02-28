@@ -1,19 +1,26 @@
 <div class="min-h-screen holi-gradient relative overflow-hidden">
-  <!-- Floating Particles Background -->
+  <!-- Floating Paint Blobs Background -->
   <div class="absolute inset-0" style="pointer-events: none;">
-    <div class="particle bg-holi-pink" style="width: 16px; height: 16px; top: 20%; left: 10%;"></div>
-    <div class="particle bg-holi-yellow" style="width: 12px; height: 12px; top: 40%; left: 80%;"></div>
-    <div class="particle bg-holi-blue" style="width: 20px; height: 20px; top: 60%; left: 15%;"></div>
-    <div class="particle bg-holi-orange" style="width: 16px; height: 16px; top: 30%; left: 70%;"></div>
-    <div class="particle bg-holi-green" style="width: 12px; height: 12px; top: 70%; left: 85%;"></div>
-    <div class="particle bg-holi-purple" style="width: 16px; height: 16px; top: 15%; left: 60%;"></div>
-    <div class="particle bg-holi-pink" style="width: 20px; height: 20px; top: 80%; left: 25%;"></div>
-    <div class="particle bg-holi-blue" style="width: 12px; height: 12px; top: 50%; left: 90%;"></div>
+    <div class="paint-blob blob-pink" style="top: 20%; left: 10%;"></div>
+    <div class="paint-blob blob-yellow" style="top: 40%; left: 80%;"></div>
+    <div class="paint-blob blob-blue" style="top: 60%; left: 15%;"></div>
+    <div class="paint-blob blob-orange" style="top: 30%; left: 70%;"></div>
+    <div class="paint-blob blob-green" style="top: 70%; left: 85%;"></div>
+    <div class="paint-blob blob-purple" style="top: 15%; left: 60%;"></div>
+    <div class="paint-blob blob-pink" style="top: 80%; left: 25%;"></div>
+    <div class="paint-blob blob-blue" style="top: 50%; left: 90%;"></div>
+    <div class="paint-blob blob-yellow" style="top: 10%; left: 45%;"></div>
+    <div class="paint-blob blob-orange" style="top: 90%; left: 65%;"></div>
+    <div class="paint-blob blob-green" style="top: 35%; left: 5%;"></div>
+    <div class="paint-blob blob-purple" style="top: 75%; left: 95%;"></div>
   </div>
 
   <!-- Main Content -->
   <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="holi-card max-w-md w-full">
+    <div class="holi-card max-w-md w-full card-entrance" 
+         (mousemove)="onCardMouseMove($event)"
+         (mouseleave)="onCardMouseLeave()"
+         [style.transform]="cardTransform">
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold mb-2" style="background: linear-gradient(135deg, var(--holi-pink), var(--holi-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
@@ -77,7 +84,9 @@
             class="color-button"
             [class.selected]="selectedColor === color"
             [style.background-color]="color"
-            (click)="selectedColor = color">
+            (click)="onColorSelect(color)"
+            (mouseenter)="onColorHover(color)"
+            (mouseleave)="onColorLeave()">
           </button>
         </div>
         <div class="mt-3">
@@ -102,7 +111,7 @@
       <!-- Attack Button -->
       <button 
         (click)="launchAttack()"
-        class="attack-button w-full"
+        class="attack-button pulse-button w-full"
         style="font-size: 18px;"
         [disabled]="!selectedFile || !attackerName.trim()">
         🎯 LAUNCH ATTACK! 💥

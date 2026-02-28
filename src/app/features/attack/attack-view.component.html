@@ -1,80 +1,107 @@
-<div class="min-h-screen holi-gradient relative overflow-hidden" *ngIf="!isLoading">
+<div class="attack-view-container" *ngIf="!isLoading">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex items-center justify-center min-h-screen">
-    <div class="holi-card text-center">
-      <div style="width: 48px; height: 48px; border: 2px solid var(--holi-pink); border-top: 2px solid transparent; border-radius: 50%; margin: 0 auto 16px auto; animation: spin 1s linear infinite;"></div>
-      <p class="text-gray-600">Loading attack...</p>
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Preparing your splash attack...</p>
     </div>
   </div>
 
-  <!-- Attack View -->
-  <div *ngIf="!isLoading && attackData" class="flex items-center justify-center min-h-screen p-4">
-    <div class="holi-card max-w-lg w-full text-center">
-      <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-4xl font-bold mb-2" style="background: linear-gradient(135deg, var(--holi-pink), var(--holi-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-          💥 SPLASHED! 💥
-        </h1>
-        <p class="text-xl font-bold text-holi-orange">
-          {{ attackData.attackerName }} attacked you with colors!
-        </p>
+  <!-- Main Attack View -->
+  <div *ngIf="!isLoading && attackData" class="main-attack-view">
+    <!-- Cinematic Splash Area (70vh) -->
+    <div class="splash-container">
+      <!-- Dark Cinematic Overlay -->
+      <div class="cinematic-overlay" 
+           [ngClass]="{'fade-out': !showOverlay, 'fade-in': showOverlay}"
+           *ngIf="showOverlay">
+        <div class="overlay-content">
+          <div class="countdown-container" *ngIf="showCountdown">
+            <div class="countdown-text">{{ countdownNumber }}</div>
+            <div class="countdown-label">Get ready...</div>
+          </div>
+          <div class="pre-splash-message" *ngIf="!showCountdown">
+            <h2 class="splash-title">{{ attackData.attackerName }} is attacking!</h2>
+            <div class="color-preview" [style.background-color]="attackData.splashColor"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Canvas Container (Placeholder for now) -->
-      <div class="mb-6 bg-gray-100 rounded-lg border-2 border-dashed" style="padding: 32px; border-color: #d1d5db;">
-        <div class="text-6xl mb-4">🎨</div>
-        <p class="text-gray-600">
-          SplashCanvasComponent will be rendered here
-        </p>
-        <p class="text-sm text-gray-500 mt-2">
-          Attack ID: {{ attackId }}
-        </p>
+      <!-- Canvas Area -->
+      <div class="canvas-container">
+        <div class="canvas-placeholder">
+          <div class="target-image-placeholder">
+            🎯 Target Image Area
+          </div>
+          <div class="splash-effects" [ngClass]="{'active': splashActive}">
+            <!-- Splash animation effects will go here -->
+            <div class="color-splash" [style.background-color]="attackData.splashColor"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom UI Panel -->
+    <div class="bottom-panel">
+      <!-- Attacker Message (with scale-in animation) -->
+      <div class="message-container" 
+           [ngClass]="{'scale-in': showMessage}" 
+           *ngIf="showMessage">
+        <div class="attacker-message">
+          <div class="message-bubble">
+            <div class="message-emoji">💥</div>
+            <div class="message-text">
+              <strong>{{ attackData.attackerName }}</strong> splashed you with 
+              <span class="color-name" [style.color]="attackData.splashColor">{{ getColorName(attackData.splashColor) }}</span>!
+            </div>
+            <div class="message-subtitle">You've been digitally colored! 🎨</div>
+          </div>
+        </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="space-y-4">
-        <button 
-          (click)="attackBack()"
-          class="attack-button w-full">
-          🎯 ATTACK BACK!
-        </button>
+      <div class="action-buttons" [ngClass]="{'visible': showButtons}">
+        <div class="primary-actions">
+          <button 
+            (click)="attackBack()"
+            class="cinematic-button primary">
+            <span class="button-icon">🎯</span>
+            <span class="button-text">ATTACK BACK!</span>
+          </button>
+        </div>
         
-        <div class="flex space-x-3">
+        <div class="secondary-actions">
           <button 
             (click)="shareAttack()"
-            class="attack-button" style="flex: 1; background: linear-gradient(135deg, var(--holi-blue), var(--holi-green));">
-            📱 Share
+            class="cinematic-button secondary">
+            <span class="button-icon">📱</span>
+            <span class="button-text">Share</span>
           </button>
           
           <button 
             (click)="goToLeaderboard()"
-            class="attack-button" style="flex: 1; background: linear-gradient(135deg, var(--holi-purple), var(--holi-pink));">
-            🏆 Leaderboard
+            class="cinematic-button secondary">
+            <span class="button-icon">🏆</span>
+            <span class="button-text">Leaderboard</span>
           </button>
         </div>
-      </div>
-
-      <!-- Fun Message -->
-      <div class="mt-6 rounded-lg" style="padding: 16px; background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));">
-        <p class="text-sm text-gray-700">
-          🎉 You've been digitally colored! Share the joy and spread the Holi spirit! 🌈
-        </p>
       </div>
     </div>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="!isLoading && !attackData" class="flex items-center justify-center min-h-screen p-4">
-    <div class="holi-card max-w-md w-full text-center">
-      <div class="text-6xl mb-4">😕</div>
-      <h2 class="text-2xl font-bold text-gray-700 mb-4">Attack Not Found</h2>
-      <p class="text-gray-600 mb-6">
+  <div *ngIf="!isLoading && !attackData" class="error-state">
+    <div class="error-content">
+      <div class="error-icon">😕</div>
+      <h2 class="error-title">Attack Not Found</h2>
+      <p class="error-message">
         This attack link might be invalid or expired.
       </p>
       <button 
         (click)="attackBack()"
-        class="attack-button">
-        🏠 Go Home
+        class="cinematic-button primary">
+        <span class="button-icon">🏠</span>
+        <span class="button-text">Go Home</span>
       </button>
     </div>
   </div>

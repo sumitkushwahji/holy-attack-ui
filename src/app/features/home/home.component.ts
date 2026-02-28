@@ -15,6 +15,8 @@ export class HomeComponent {
   attackerName: string = '';
   selectedColor: string = '#FF69B4';
   isDragOver: boolean = false;
+  cardTransform: string = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+  isCardHovered: boolean = false;
 
   constructor(private router: Router) {}
 
@@ -80,5 +82,42 @@ export class HomeComponent {
     this.router.navigate(['/attack', attackId], { 
       state: { attackData } 
     });
+  }
+
+  onCardMouseMove(event: MouseEvent) {
+    if (!this.isCardHovered) {
+      this.isCardHovered = true;
+    }
+    
+    const card = event.currentTarget as HTMLElement;
+    const rect = card.getBoundingClientRect();
+    
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    const width = rect.width;
+    const height = rect.height;
+    
+    const rotateY = ((x - width / 2) / width) * 20; // Max 20 degrees
+    const rotateX = ((y - height / 2) / height) * -20; // Max 20 degrees
+    
+    this.cardTransform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+  }
+
+  onCardMouseLeave() {
+    this.isCardHovered = false;
+    this.cardTransform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+  }
+
+  onColorSelect(color: string) {
+    this.selectedColor = color;
+  }
+
+  onColorHover(color: string) {
+    // Optional: Add hover effects
+  }
+
+  onColorLeave() {
+    // Optional: Remove hover effects
   }
 }
