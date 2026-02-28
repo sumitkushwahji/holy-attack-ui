@@ -1,0 +1,141 @@
+<div class="min-h-screen holi-gradient relative overflow-hidden">
+  <!-- Floating Particles Background -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="particle w-4 h-4 bg-holi-pink" style="top: 10%; left: 5%;"></div>
+    <div class="particle w-3 h-3 bg-holi-yellow" style="top: 25%; left: 90%;"></div>
+    <div class="particle w-5 h-5 bg-holi-blue" style="top: 70%; left: 10%;"></div>
+    <div class="particle w-4 h-4 bg-holi-orange" style="top: 45%; left: 85%;"></div>
+    <div class="particle w-3 h-3 bg-holi-green" style="top: 80%; left: 75%;"></div>
+    <div class="particle w-4 h-4 bg-holi-purple" style="top: 15%; left: 70%;"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="holi-card max-w-4xl w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-4" style="background: linear-gradient(135deg, var(--holi-pink), var(--holi-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          🏆 Holi Attack Champions 🏆
+        </h1>
+        
+        <!-- Daily Counter -->
+        <div class="rounded-full mb-6" style="background: linear-gradient(135deg, var(--holi-yellow), var(--holi-orange)); color: white; padding: 12px 24px; display: inline-block;">
+          <span class="text-2xl font-bold">{{ dailyCount }}</span>
+          <span class="text-sm" style="margin-left: 8px;">attacks today!</span>
+        </div>
+      </div>
+
+      <!-- Leaderboard Table -->
+      <div style="overflow-x: auto;">
+        <table class="w-full" style="border-collapse: separate; border-spacing: 0;">
+          <thead>
+            <tr style="border-bottom: 2px solid #e5e7eb;">
+              <th class="text-left font-bold text-gray-700" style="padding: 12px 8px;">Rank</th>
+              <th class="text-left font-bold text-gray-700" style="padding: 12px 8px;">Player</th>
+              <th class="text-center font-bold text-gray-700" style="padding: 12px 8px;">Attacks</th>
+              <th class="text-center font-bold text-gray-700" style="padding: 12px 8px;">Colors Used</th>
+              <th class="text-center font-bold text-gray-700" style="padding: 12px 8px;">Last Attack</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              *ngFor="let player of leaderboard; trackBy: trackByRank"
+              class="transition-all duration-200"
+              [ngStyle]="{
+                'border-bottom': '1px solid #f3f4f6',
+                'background': player.rank <= 3 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 165, 0, 0.05))' : 'transparent',
+                'font-size': player.rank <= 3 ? '18px' : '16px',
+                'font-weight': player.rank <= 3 ? '600' : '400'
+              }"
+              style="cursor: pointer;"
+              (mouseenter)="onRowHover($event, true)"
+              (mouseleave)="onRowHover($event, false, player.rank)">
+              
+              <!-- Rank -->
+              <td class="py-4 px-2">
+                <span class="text-2xl">{{ getRankDisplay(player.rank) }}</span>
+              </td>
+              
+              <!-- Player Name -->
+              <td style="padding: 16px 8px;">
+                <div class="flex items-center">
+                  <div 
+                    class="rounded-full font-bold" 
+                    style="width: 40px; height: 40px; margin-right: 12px; display: flex; align-items: center; justify-content: center; color: white;"
+                    [ngStyle]="{
+                      'background': player.rank === 1 ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' :
+                                   player.rank === 2 ? 'linear-gradient(135deg, #d1d5db, #9ca3af)' :
+                                   player.rank === 3 ? 'linear-gradient(135deg, #fed7aa, #fb923c)' :
+                                   'linear-gradient(135deg, var(--holi-purple), var(--holi-pink))'
+                    }">
+                    {{ player.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="font-medium">{{ player.name }}</span>
+                </div>
+              </td>
+              
+              <!-- Attacks Count -->
+              <td class="text-center" style="padding: 16px 8px;">
+                <span class="rounded-full text-sm font-bold" style="background: var(--holi-pink); color: white; padding: 4px 12px;">
+                  {{ player.attacks }}
+                </span>
+              </td>
+              
+              <!-- Total Colors -->
+              <td class="text-center" style="padding: 16px 8px;">
+                <span class="rounded-full text-sm font-bold" style="background: var(--holi-blue); color: white; padding: 4px 12px;">
+                  {{ player.totalColors }}
+                </span>
+              </td>
+              
+              <!-- Last Attack -->
+              <td class="text-center text-gray-600 text-sm" style="padding: 16px 8px;">
+                {{ getTimeAgo(player.lastAttack) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex justify-center">
+        <div class="space-y-4" style="max-width: 400px; width: 100%;">
+          <button 
+            (click)="goHome()"
+            class="attack-button w-full">
+            🎯 Launch New Attack
+          </button>
+          
+          <button class="attack-button w-full" style="background: linear-gradient(135deg, var(--holi-blue), var(--holi-green));">
+            📱 Share Leaderboard
+          </button>
+        </div>
+      </div>
+
+      <!-- Fun Stats -->
+      <div class="mt-8" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div class="rounded-lg text-center" style="background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(147, 112, 219, 0.2)); padding: 16px;">
+          <div class="text-2xl font-bold text-holi-purple">24/7</div>
+          <div class="text-sm text-gray-600">Color Battles</div>
+        </div>
+        
+        <div class="rounded-lg text-center" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2)); padding: 16px;">
+          <div class="text-2xl font-bold text-holi-orange">∞</div>
+          <div class="text-sm text-gray-600">Fun Guaranteed</div>
+        </div>
+        
+        <div class="rounded-lg text-center" style="background: linear-gradient(135deg, rgba(135, 206, 235, 0.2), rgba(50, 205, 50, 0.2)); padding: 16px;">
+          <div class="text-2xl font-bold text-holi-blue">100%</div>
+          <div class="text-sm text-gray-600">Digital Safety</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-6">
+        <p class="text-xs text-gray-500">
+          🌈 Leaderboard resets daily at midnight IST • Keep the colors flying! 🎨
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

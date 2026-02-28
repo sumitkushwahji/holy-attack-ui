@@ -1,0 +1,119 @@
+<div class="min-h-screen holi-gradient relative overflow-hidden">
+  <!-- Floating Particles Background -->
+  <div class="absolute inset-0" style="pointer-events: none;">
+    <div class="particle bg-holi-pink" style="width: 16px; height: 16px; top: 20%; left: 10%;"></div>
+    <div class="particle bg-holi-yellow" style="width: 12px; height: 12px; top: 40%; left: 80%;"></div>
+    <div class="particle bg-holi-blue" style="width: 20px; height: 20px; top: 60%; left: 15%;"></div>
+    <div class="particle bg-holi-orange" style="width: 16px; height: 16px; top: 30%; left: 70%;"></div>
+    <div class="particle bg-holi-green" style="width: 12px; height: 12px; top: 70%; left: 85%;"></div>
+    <div class="particle bg-holi-purple" style="width: 16px; height: 16px; top: 15%; left: 60%;"></div>
+    <div class="particle bg-holi-pink" style="width: 20px; height: 20px; top: 80%; left: 25%;"></div>
+    <div class="particle bg-holi-blue" style="width: 12px; height: 12px; top: 50%; left: 90%;"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="holi-card max-w-md w-full">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold mb-2" style="background: linear-gradient(135deg, var(--holi-pink), var(--holi-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          🎨 Virtual Pichkari
+        </h1>
+        <h2 class="text-2xl font-bold text-holi-orange mb-2">ATTACK!</h2>
+        <p class="text-gray-600">Upload your friend's photo and splash them with colors!</p>
+      </div>
+
+      <!-- File Upload Section -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Upload Friend's Photo
+        </label>
+        <div 
+          class="border-2 border-dashed rounded-lg text-center transition-colors cursor-pointer"
+          [ngClass]="{
+            'drag-over': isDragOver
+          }"
+          style="padding: 24px; border-color: #d1d5db;"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()">
+          
+          <input 
+            #fileInput
+            type="file" 
+            class="hidden" 
+            accept="image/*"
+            (change)="onFileSelected($event)">
+          
+          <div *ngIf="!selectedFile; else fileSelected">
+            <svg style="margin: 0 auto 8px auto; width: 48px; height: 48px; color: #9ca3af;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <p class="text-gray-600">
+              <span class="font-medium text-holi-purple">Click to upload</span> or drag and drop
+            </p>
+            <p class="text-xs text-gray-500" style="margin-top: 4px;">PNG, JPG, GIF up to 10MB</p>
+          </div>
+          
+          <ng-template #fileSelected>
+            <svg style="margin: 0 auto 8px auto; width: 48px; height: 48px; color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <p class="font-medium" style="color: #059669;">{{ selectedFile?.name }}</p>
+            <p class="text-xs text-gray-500">Click to change</p>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Color Picker -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Choose Your Color
+        </label>
+        <div class="flex space-x-3">
+          <button
+            *ngFor="let color of ['#FF69B4', '#FFD700', '#87CEEB', '#FFA500', '#32CD32', '#9370DB']"
+            class="color-button"
+            [class.selected]="selectedColor === color"
+            [style.background-color]="color"
+            (click)="selectedColor = color">
+          </button>
+        </div>
+        <div class="mt-3">
+          <input 
+            type="color" 
+            [(ngModel)]="selectedColor">
+        </div>
+      </div>
+
+      <!-- Attacker Name Input -->
+      <div class="mb-8">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Your Name (for the attack message)
+        </label>
+        <input 
+          type="text" 
+          [(ngModel)]="attackerName"
+          placeholder="Enter your name..."
+          maxlength="50">
+      </div>
+
+      <!-- Attack Button -->
+      <button 
+        (click)="launchAttack()"
+        class="attack-button w-full"
+        style="font-size: 18px;"
+        [disabled]="!selectedFile || !attackerName.trim()">
+        🎯 LAUNCH ATTACK! 💥
+      </button>
+
+      <!-- Footer -->
+      <div class="text-center mt-6">
+        <p class="text-xs text-gray-500">
+          Share the fun! No real colors were harmed in this digital celebration 🎨
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
