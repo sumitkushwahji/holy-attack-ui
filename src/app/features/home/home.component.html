@@ -64,11 +64,26 @@
           </div>
           
           <ng-template #fileSelected>
-            <svg style="margin: 0 auto 8px auto; width: 48px; height: 48px; color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <p class="font-medium" style="color: #059669;">{{ selectedFile?.name }}</p>
-            <p class="text-xs text-gray-500">Click to change</p>
+            <div class="image-preview-container" *ngIf="imagePreviewUrl; else fileInfoOnly">
+              <img [src]="imagePreviewUrl" alt="Preview" class="image-preview">
+              <div class="image-overlay">
+                <div class="image-info">
+                  <svg style="margin: 0 auto 8px auto; width: 24px; height: 24px; color: white;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p class="text-white font-medium">{{ selectedFile?.name }}</p>
+                  <p class="text-white text-xs opacity-80">Click to change</p>
+                </div>
+              </div>
+            </div>
+            
+            <ng-template #fileInfoOnly>
+              <svg style="margin: 0 auto 8px auto; width: 48px; height: 48px; color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <p class="font-medium" style="color: #059669;">{{ selectedFile?.name }}</p>
+              <p class="text-xs text-gray-500">Click to change</p>
+            </ng-template>
           </ng-template>
         </div>
       </div>

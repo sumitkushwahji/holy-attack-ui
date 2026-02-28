@@ -21,19 +21,23 @@
         <!-- Daily Counter -->
         <div class="rounded-full mb-6" style="background: linear-gradient(135deg, var(--holi-yellow), var(--holi-orange)); color: white; padding: 12px 24px; display: inline-block;">
           <span class="text-2xl font-bold">{{ dailyCount }}</span>
-          <span class="text-sm" style="margin-left: 8px;">attacks today!</span>
+          <span class="text-sm" style="margin-left: 8px;">{{ dailyMessage || 'attacks today!' }}</span>
         </div>
       </div>
 
       <!-- Leaderboard Table -->
-      <div style="overflow-x: auto;">
+      <div *ngIf="isLoading" class="text-center py-8">
+        <div class="loading-spinner" style="width: 48px; height: 48px; border: 3px solid var(--holi-pink); border-top: 3px solid transparent; border-radius: 50%; margin: 0 auto 16px auto; animation: spin 1s linear infinite;"></div>
+        <p class="text-gray-600">Loading leaderboard...</p>
+      </div>
+      
+      <div *ngIf="!isLoading" style="overflow-x: auto;">
         <table class="w-full" style="border-collapse: separate; border-spacing: 0;">
           <thead>
             <tr style="border-bottom: 2px solid #e5e7eb;">
               <th class="text-left font-bold text-gray-700" style="padding: 12px 8px;">Rank</th>
               <th class="text-left font-bold text-gray-700" style="padding: 12px 8px;">Player</th>
               <th class="text-center font-bold text-gray-700" style="padding: 12px 8px;">Attacks</th>
-              <th class="text-center font-bold text-gray-700" style="padding: 12px 8px;">Colors Used</th>
               <th class="text-center font-bold text-gray-700" style="padding: 12px 8px;">Last Attack</th>
             </tr>
           </thead>
@@ -68,23 +72,16 @@
                                    player.rank === 3 ? 'linear-gradient(135deg, #fed7aa, #fb923c)' :
                                    'linear-gradient(135deg, var(--holi-purple), var(--holi-pink))'
                     }">
-                    {{ player.name.charAt(0).toUpperCase() }}
+                    {{ player.attackerName.charAt(0).toUpperCase() }}
                   </div>
-                  <span class="font-medium">{{ player.name }}</span>
+                  <span class="font-medium">{{ player.attackerName }}</span>
                 </div>
               </td>
               
               <!-- Attacks Count -->
               <td class="text-center" style="padding: 16px 8px;">
                 <span class="rounded-full text-sm font-bold" style="background: var(--holi-pink); color: white; padding: 4px 12px;">
-                  {{ player.attacks }}
-                </span>
-              </td>
-              
-              <!-- Total Colors -->
-              <td class="text-center" style="padding: 16px 8px;">
-                <span class="rounded-full text-sm font-bold" style="background: var(--holi-blue); color: white; padding: 4px 12px;">
-                  {{ player.totalColors }}
+                  {{ player.totalAttacks }}
                 </span>
               </td>
               

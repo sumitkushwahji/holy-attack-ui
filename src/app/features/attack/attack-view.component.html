@@ -22,7 +22,7 @@
           </div>
           <div class="pre-splash-message" *ngIf="!showCountdown">
             <h2 class="splash-title">{{ attackData.attackerName }} is attacking!</h2>
-            <div class="color-preview" [style.background-color]="attackData.splashColor"></div>
+            <div class="color-preview" [style.background-color]="attackData.color"></div>
           </div>
         </div>
       </div>
@@ -30,12 +30,23 @@
       <!-- Canvas Area -->
       <div class="canvas-container">
         <div class="canvas-placeholder">
-          <div class="target-image-placeholder">
+          <!-- Actual uploaded image -->
+          <div class="target-image-container" *ngIf="attackImageUrl || (attackData && attackData.imageUrl)">
+            <img 
+              [src]="attackImageUrl || (attackData ? attackData.imageUrl : '')" 
+              [alt]="'Target image for ' + (attackData ? attackData.attackerName : 'Anonymous')"
+              class="target-image"
+              (error)="onImageLoadError($event)">
+          </div>
+          
+          <!-- Fallback placeholder -->
+          <div class="target-image-placeholder" *ngIf="!attackImageUrl && (!attackData || !attackData.imageUrl)">
             🎯 Target Image Area
           </div>
+          
           <div class="splash-effects" [ngClass]="{'active': splashActive}">
             <!-- Splash animation effects will go here -->
-            <div class="color-splash" [style.background-color]="attackData.splashColor"></div>
+            <div class="color-splash" [style.background-color]="attackData.color"></div>
           </div>
         </div>
       </div>
@@ -52,7 +63,7 @@
             <div class="message-emoji">💥</div>
             <div class="message-text">
               <strong>{{ attackData.attackerName }}</strong> splashed you with 
-              <span class="color-name" [style.color]="attackData.splashColor">{{ getColorName(attackData.splashColor) }}</span>!
+              <span class="color-name" [style.color]="attackData.color">{{ getColorName(attackData.color) }}</span>!
             </div>
             <div class="message-subtitle">You've been digitally colored! 🎨</div>
           </div>

@@ -1,14 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
-interface LeaderboardEntry {
-  rank: number;
-  name: string;
-  attacks: number;
-  totalColors: number;
-  lastAttack: Date;
-}
+import { AttackService, LeaderboardEntry, DailyStatsResponse } from '../../core/services/attack.service';
 
 @Component({
   selector: 'app-leaderboard',
@@ -20,57 +13,81 @@ interface LeaderboardEntry {
 export class LeaderboardComponent implements OnInit {
   leaderboard: LeaderboardEntry[] = [];
   dailyCount: number = 0;
+  dailyMessage: string = '';
+  isLoading: boolean = true;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private attackService: AttackService
+  ) {}
 
   ngOnInit() {
     this.loadLeaderboard();
-    this.loadDailyCount();
+    this.loadDailyStats();
   }
 
   private loadLeaderboard() {
-    // Mock data for demonstration
+    this.attackService.getLeaderboard(10).subscribe({
+      next: (data: LeaderboardEntry[]) => {
+        this.leaderboard = data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load leaderboard:', error);
+        this.loadFallbackData();
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private loadDailyStats() {
+    this.attackService.getDailyStats().subscribe({
+      next: (stats: DailyStatsResponse) => {
+        this.dailyCount = stats.totalAttacksToday;
+        this.dailyMessage = stats.formattedMessage;
+      },
+      error: (error) => {
+        console.error('Failed to load daily stats:', error);
+        this.dailyCount = 0;
+        this.dailyMessage = 'No attacks today yet! 🎨';
+      }
+    });
+  }
+
+  private loadFallbackData() {
+    // Fallback data in case backend is not available
     this.leaderboard = [
       {
         rank: 1,
-        name: 'ColorMaster2024',
-        attacks: 156,
-        totalColors: 432,
-        lastAttack: new Date(Date.now() - 2 * 60 * 1000) // 2 minutes ago
+        attackerName: 'ColorMaster2024',
+        totalAttacks: 156,
+        lastAttack: new Date(Date.now() - 2 * 60 * 1000).toISOString()
       },
       {
         rank: 2,
-        name: 'HoliWarrior',
-        attacks: 143,
-        totalColors: 387,
-        lastAttack: new Date(Date.now() - 15 * 60 * 1000) // 15 minutes ago
+        attackerName: 'HoliWarrior',
+        totalAttacks: 143,
+        lastAttack: new Date(Date.now() - 15 * 60 * 1000).toISOString()
       },
       {
         rank: 3,
-        name: 'SplashKing',
-        attacks: 128,
-        totalColors: 356,
-        lastAttack: new Date(Date.now() - 45 * 60 * 1000) // 45 minutes ago
+        attackerName: 'SplashKing',
+        totalAttacks: 128,
+        lastAttack: new Date(Date.now() - 45 * 60 * 1000).toISOString()
       },
       {
         rank: 4,
-        name: 'RainbowRider',
-        attacks: 94,
-        totalColors: 267,
-        lastAttack: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+        attackerName: 'RainbowRider',
+        totalAttacks: 94,
+        lastAttack: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
       },
       {
         rank: 5,
-        name: 'PichkariPro',
-        attacks: 87,
-        totalColors: 241,
-        lastAttack: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
+        attackerName: 'PichkariPro',
+        totalAttacks: 87,
+        lastAttack: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
       }
     ];
-  }
-
-  private loadDailyCount() {
-    // Mock daily counter
     this.dailyCount = 2847;
   }
 
@@ -78,7 +95,8 @@ export class LeaderboardComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
-  getTimeAgo(date: Date): string {
+  getTimeAgo(dateString: string): string {
+    const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));

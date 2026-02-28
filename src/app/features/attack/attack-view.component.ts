@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AttackService, AttackResponse } from '../../core/services/attack.service';
 
 @Component({
   selector: 'app-attack-view',
@@ -11,7 +12,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class AttackViewComponent implements OnInit {
   attackId: string = '';
-  attackData: any = null;
+  attackData: AttackResponse | null = null;
+  attackImageUrl: string | null = null; // Store the actual image URL/data
   isLoading: boolean = true;
   
   // Cinematic animation states
@@ -24,35 +26,46 @@ export class AttackViewComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private attackService: AttackService
   ) {}
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.attackId = params['id'];
+      // Load the stored image data for this attack
+      this.attackImageUrl = localStorage.getItem(`attack_image_${this.attackId}`);
       this.loadAttackData();
     });
-
-    // Get data from router state if available
-    const navigation = window.history.state;
-    if (navigation?.attackData) {
-      this.attackData = navigation.attackData;
-      this.isLoading = false;
-    }
   }
 
   private loadAttackData() {
-    // Try to load from localStorage (fallback)
-    const storedData = localStorage.getItem(`attack_${this.attackId}`);
-    if (storedData) {
-      this.attackData = JSON.parse(storedData);
-    } else if (!this.attackData) {
-      // No attack data found, redirect to home
-      this.router.navigate(['/']);
-      return;
-    }
-    this.isLoading = false;
-    this.startCinematicSequence();
+    this.attackService.getAttack(this.attackId).subscribe({
+      next: (response) => {
+        this.attackData = response;
+        this.isLoading = false;
+        this.startCinematicSequence();
+        
+        // Increment the attack counter since someone viewed it
+        this.attackService.incrementAttackCounter(this.attackId).subscribe({
+          next: (updatedAttack) => {
+            // Update the attack count in our local data
+            if (this.attackData) {
+              this.attackData.attackCount = updatedAttack.attackCount;
+            }
+          },
+          error: (error) => {
+            console.warn('Failed to increment attack counter:', error);
+            // Continue anyway, this is not critical
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Failed to load attack:', error);
+        this.isLoading = false;
+        this.attackData = null;
+      }
+    });
   }
 
   private startCinematicSequence() {
@@ -108,6 +121,13 @@ export class AttackViewComponent implements OnInit {
     return colorMap[hexColor] || 'Colorful';
   }
 
+  onImageLoadError(event: Event) {
+    console.warn('Failed to load target image, using fallback');
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+    // Show fallback placeholder
+  }
+
   attackBack() {
     this.router.navigate(['/']);
   }
@@ -117,16 +137,22 @@ export class AttackViewComponent implements OnInit {
   }
 
   shareAttack() {
+    const shareUrl = this.attackData?.shareableLink || window.location.href;
+    const shareText = `${this.attackData?.attackerName || 'Someone'} just attacked you with colors! 🎨`;
+    
     if (navigator.share) {
       navigator.share({
         title: 'Virtual Pichkari Attack!',
-        text: `${this.attackData?.attackerName || 'Someone'} just attacked you with colors! 🎨`,
-        url: window.location.href
+        text: shareText,
+        url: shareUrl
       });
     } else {
       // Fallback: copy link to clipboard
-      navigator.clipboard.writeText(window.location.href).then(() => {
+      navigator.clipboard.writeText(shareUrl).then(() => {
         alert('Link copied to clipboard!');
+      }).catch(() => {
+        // Fallback for older browsers
+        prompt('Copy this link:', shareUrl);
       });
     }
   }

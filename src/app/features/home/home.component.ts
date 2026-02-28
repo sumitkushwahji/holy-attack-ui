@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AttackService, CreateAttackRequest } from '../../core/services/attack.service';
 
 @Component({
   selector: 'app-home',
@@ -17,8 +18,12 @@ export class HomeComponent {
   isDragOver: boolean = false;
   cardTransform: string = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
   isCardHovered: boolean = false;
+  imagePreviewUrl: string | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private attackService: AttackService
+  ) {}
 
   onDragOver(event: DragEvent) {
     event.preventDefault();
@@ -49,6 +54,16 @@ export class HomeComponent {
   private handleFileSelect(file: File) {
     if (file.type.startsWith('image/')) {
       this.selectedFile = file;
+      
+      // Create a preview URL for the uploaded image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageDataUrl = e.target?.result as string;
+        this.imagePreviewUrl = imageDataUrl;
+        // Store the image data in localStorage for demo purposes
+        localStorage.setItem('uploadedImageData', imageDataUrl);
+      };
+      reader.readAsDataURL(file);
     } else {
       alert('Please select an image file!');
     }
@@ -60,27 +75,33 @@ export class HomeComponent {
       return;
     }
 
-    // Create a unique attack ID
-    const attackId = Date.now().toString();
+    // For the API call, use a placeholder URL instead of the full base64 image
+    // The actual image will be stored separately for display
+    const placeholderUrl = 'https://holy-attack.app/uploads/' + this.selectedFile.name;
     
-    // Store attack data (in real app, this would be sent to backend)
-    const attackData = {
-      id: attackId,
-      attackerName: this.attackerName,
-      targetImage: this.selectedFile,
-      splashColor: this.selectedColor,
-      timestamp: new Date()
+    const createRequest: CreateAttackRequest = {
+      attackerName: this.attackerName.trim(),
+      color: this.selectedColor,
+      imageUrl: placeholderUrl,
+      victimName: 'Friend' // Default victim name
     };
 
-    // Store in localStorage for demo purposes
-    localStorage.setItem(`attack_${attackId}`, JSON.stringify({
-      ...attackData,
-      targetImage: null // Can't store File in localStorage
-    }));
-
-    // Navigate to attack view
-    this.router.navigate(['/attack', attackId], { 
-      state: { attackData } 
+    this.attackService.createAttack(createRequest).subscribe({
+      next: (response) => {
+        console.log('Attack created:', response);
+        
+        // Store the actual image data for the attack view
+        if (this.imagePreviewUrl) {
+          localStorage.setItem(`attack_image_${response.attackId}`, this.imagePreviewUrl);
+        }
+        
+        // Navigate to attack view using the backend ID
+        this.router.navigate(['/attack', response.attackId]);
+      },
+      error: (error) => {
+        console.error('Failed to create attack:', error);
+        alert('Failed to create attack. Please try again!');
+      }
     });
   }
 
